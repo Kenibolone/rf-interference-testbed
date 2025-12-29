@@ -14,14 +14,14 @@ RF24 radio1(CE1, CSN1);
 #define CSN2 9
 RF24 radio2(CE2, CSN2);
 
-enum JammerMode {
+enum TestModes {
   IDLE,
   TARGET_CHANNEL,
   RANDOM_SWEEP,
-  AGGRESSIVE_BLAST
+  CONTINUOUS_INTERFERENCE
 };
 
-JammerMode currentMode = IDLE;
+TestModes currentMode = IDLE;
 
 void setupNRF(RF24 &radio, uint8_t ce_pin, uint8_t channel) {
   pinMode(ce_pin, OUTPUT);
@@ -42,12 +42,12 @@ void setupNRF(RF24 &radio, uint8_t ce_pin, uint8_t channel) {
 //First thing that the person will see in the cmd prompt
 void showMenu()
 {
-  Serial.println(F("===== CYPHER JAMMER ====="));
-  Serial.println(F("1. Target specific wifi channel"));
-  Serial.println(F("2. Random sweep (Wi-Fi + BLE)"));
-  Serial.println(F("3. BLE flood spoof [coming soon]"));
-  Serial.println(F("4. Aggressive static flood"));
-  Serial.println(F("5. Exit"));
+  Serial.println(F("===== RF INTERFERENCE TESTBED ====="));
+  Serial.println(F("1. Target specific RF channel"));
+  Serial.println(F("2. Random channel sweep"));
+  Serial.println(F("3. Reserved for future experiments"));
+  Serial.println(F("4. Continuous interference mode"));
+  Serial.println(F("5. Stop transmission"));
   Serial.println(F(">> "));
 }
 
@@ -66,7 +66,7 @@ void setup() {
   radio2.begin(&SPI2);
   setupNRF(radio2, CE2, 69); 
 
-  Serial.println("Jammer online."); //Well technically this is the first thing the user will see
+  Serial.println("RF testbed online."); //Well technically this is the first thing the user will see
   showMenu();
 }
 
@@ -92,14 +92,14 @@ void loop() {
     }
 
     else if (input == "4"){
-      Serial.println("Aggressive flood started.");
+      Serial.println("Continuous interference mode started.");
       radio1.setChannel(3);
       radio2.setChannel(3);
-      currentMode = AGGRESSIVE_BLAST;
+      currentMode = CONTINUOUS_INTERFERENCE;
     }
 
     else if (input == "5"){
-      Serial.println("Stopping jamming.");
+      Serial.println("Stopping interference.");
       currentMode = IDLE;
     }
     showMenu();
@@ -117,7 +117,7 @@ void loop() {
       delay(100);
       break;
     }
-    case AGGRESSIVE_BLAST:{
+    case CONTINUOUS_INTERFERENCE:{
       radio1.setChannel(3 + random(0, 2));
       radio2.setChannel(3 + random(0, 2));
       delay(5);
